@@ -1,0 +1,4 @@
+name: anperical-events-main
+version: '${version}'
+main: io.github.duechayapolgmit.anpericaleventsmain.Runner
+api-version: '1.20'
