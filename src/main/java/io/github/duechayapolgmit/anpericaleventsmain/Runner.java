@@ -15,6 +15,7 @@ public final class Runner extends JavaPlugin {
 
     private BukkitTask scoreboardTask;
     private BukkitTask bossbarTask;
+    private BukkitTask bgBossBarTask;
 
     private BukkitTask timerTask;
 
@@ -23,10 +24,12 @@ public final class Runner extends JavaPlugin {
     @Override
     public void onEnable() {
         time = new Time(60);
+        BossBarMain statusBar = new BossBarMain("\uE001");
         BossBarMain timeBossBar = new BossBarMain(time);
 
         scoreboardTask = getServer().getScheduler().runTaskTimer(this, ScoreboardMain.getInstance(), 0, 20);
-        bossbarTask = getServer().getScheduler().runTaskTimer(this, timeBossBar, 20, 20);
+        bgBossBarTask = getServer().getScheduler().runTaskTimer(this, statusBar, 0, 4);
+        bossbarTask = getServer().getScheduler().runTaskTimer(this, timeBossBar, 23, 18);
 
         timerTask = Bukkit.getServer().getScheduler().runTaskTimer(this, new Runnable() {
             @Override

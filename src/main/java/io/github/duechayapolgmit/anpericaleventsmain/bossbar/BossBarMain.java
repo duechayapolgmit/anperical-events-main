@@ -7,6 +7,7 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -16,11 +17,12 @@ public class BossBarMain implements Runnable {
 
     private Time time;
 
-    public BossBarMain(String text) {
-        Key font = Key.key("cgn:default");
+    private final Key FONT = Key.key("cgn:default_shift_up");
+    private final Key BG = Key.key("cgn:boss_bar");
 
-        TextComponent title = (TextComponent) Component.text(text)
-                .font(font);
+    public BossBarMain(String text) {
+
+        TextComponent title = (TextComponent) Component.text(text).font(BG).color(TextColor.fromCSSHexString("#4e5c24"));
 
         bar = BossBar.bossBar(title, 1, BossBar.Color.WHITE, BossBar.Overlay.PROGRESS);
 
@@ -28,10 +30,8 @@ public class BossBarMain implements Runnable {
 
     public BossBarMain(Time time) {
         this.time = time;
-        Key font = Key.key("cgn:default");
 
-        TextComponent title = (TextComponent) Component.text(time.getTime())
-                .font(font);
+        TextComponent title = (TextComponent) Component.text(time.getTime()).font(FONT);
 
         bar = BossBar.bossBar(title, 1, BossBar.Color.WHITE, BossBar.Overlay.PROGRESS);
     }
@@ -40,8 +40,7 @@ public class BossBarMain implements Runnable {
     public void update(){
         Key font = Key.key("cgn:default");
 
-        TextComponent title = (TextComponent) Component.text(this.time.getTime())
-                .font(font);
+        TextComponent title = (TextComponent) Component.text(this.time.getTime()).font(FONT);
 
         bar = bar.name(title);
     }
