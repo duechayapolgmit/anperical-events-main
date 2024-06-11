@@ -1,8 +1,9 @@
 package io.github.duechayapolgmit.anpericaleventsmain;
 
+import io.github.duechayapolgmit.anpericaleventsmain.bossbar.TimeBossBar;
 import io.github.duechayapolgmit.anpericaleventsmain.chat.ChatManager;
 import io.github.duechayapolgmit.anpericaleventsmain.chat.GameStateChangeChat;
-import io.github.duechayapolgmit.anpericaleventsmain.gui.BossBarMain;
+import io.github.duechayapolgmit.anpericaleventsmain.bossbar.BossBar;
 import io.github.duechayapolgmit.anpericaleventsmain.gui.ScoreboardMain;
 
 import io.github.duechayapolgmit.anpericaleventsmain.state.GameState;
@@ -11,11 +12,10 @@ import io.github.duechayapolgmit.anpericaleventsmain.utils.Time;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
-import org.bukkit.boss.BossBar;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
@@ -23,43 +23,60 @@ import java.util.List;
 
 public final class Runner extends JavaPlugin {
 
+    BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+
     private BukkitTask scoreboardTask;
     private BukkitTask bossbarTask;
     private BukkitTask bgBossBarTask;
-
     private BukkitTask timerTask;
 
-    private List<BossBarMain> activeBossBars = new ArrayList<BossBarMain>();
+    private List<BossBar> activeBossBars = new ArrayList<BossBar>();
+
+    private GameState currentState = GameState.PRE_GAME;
 
     Time time;
 
     @Override
     public void onEnable() {
-        time = new Time(120);
+        time = new Time(11);
 
-        BossBarMain statusBar = new BossBarMain("\uE001");
+        BossBar statusBar = new BossBar("\uE001");
         activeBossBars.add(statusBar);
-        BossBarMain timeBossBar = new BossBarMain(time);
+        TimeBossBar timeBossBar = new TimeBossBar(currentState, time);
         activeBossBars.add(timeBossBar);
 
-        ChatManager.getInstance().sendMessage(ChatType.DEBUG, Component.text("Plugin initialised"));
-        ChatManager.getInstance().sendMessage(ChatType.DEBUG, GameStateChangeChat.getMessage(GameState.PRE_GAME,GameState.IN_GAME));
+        ChatManager.getInstance().sendMessage(ChatType.DEBUG, Component.text("Plugin initialised").color(TextColor.color(0xFFFFFF)));
 
-        scoreboardTask = getServer().getScheduler().runTaskTimer(this, ScoreboardMain.getInstance(), 0, 20);
-        bgBossBarTask = getServer().getScheduler().runTaskTimer(this, statusBar, 0, 4);
-        bossbarTask = getServer().getScheduler().runTaskTimer(this, timeBossBar, 23, 18);
+        scoreboardTask = scheduler.runTaskTimer(this, ScoreboardMain.getInstance(), 0, 20);
+        bgBossBarTask = scheduler.runTaskTimer(this, statusBar, 0, 4);
+        bossbarTask = scheduler.runTaskTimer(this, timeBossBar, 23, 18);
 
-        timerTask = Bukkit.getServer().getScheduler().runTaskTimer(this, new Runnable() {
+        // to be refactored
+        timerTask = scheduler.runTaskTimer(this, new Runnable() {
             @Override
             public void run() {
-                time.decrement();
+                if (timeBossBar.getTime() == null) {
+                    timeBossBar.update();
+                    timerTask.cancel();
+                }
+                timeBossBar.getTime().decrement();
+                if (timeBossBar.getTime().getRawTime() == 0) {
+                    if (currentState == GameState.PRE_GAME) {
+                        ChatManager.getInstance().sendMessage(ChatType.DEBUG, GameStateChangeChat.getMessage(GameState.PRE_GAME,GameState.IN_GAME));
+                        timeBossBar.setTime(new Time(10));
+                        timeBossBar.changeState(GameState.IN_GAME);
+                        currentState = GameState.IN_GAME;
+                    }
+                    else if (currentState == GameState.IN_GAME) {
+                        ChatManager.getInstance().sendMessage(ChatType.DEBUG, GameStateChangeChat.getMessage(GameState.IN_GAME,GameState.POST_GAME));
+                        currentState = GameState.POST_GAME;
+                        timeBossBar.setTime(null);
+                        timeBossBar.changeState(GameState.POST_GAME);
+                    }
+                }
                 timeBossBar.update();
-
-                if (time.getRawTime() == 0) timerTask.cancel();
             }
         }, 20, 20);
-
-
     }
 
     @Override
@@ -67,11 +84,11 @@ public final class Runner extends JavaPlugin {
         // Plugin shutdown logic
 
         // Disable boss bars
-        for (BossBarMain bar: activeBossBars){
+        for (BossBar bar: activeBossBars){
             bar.remove();
             System.out.println(bar);
         }
-        activeBossBars = new ArrayList<BossBarMain>();
+        activeBossBars = new ArrayList<BossBar>();
 
         bgBossBarTask.cancel();
         bossbarTask.cancel();
