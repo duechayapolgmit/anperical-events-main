@@ -1,7 +1,5 @@
-package io.github.duechayapolgmit.anpericaleventsmain.bossbar;
+package io.github.duechayapolgmit.anpericaleventsmain.gui;
 
-import io.github.duechayapolgmit.anpericaleventsmain.bossbar.BossBarMain;
-import io.github.duechayapolgmit.anpericaleventsmain.scoreboard.ScoreboardMain;
 import io.github.duechayapolgmit.anpericaleventsmain.utils.Time;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
@@ -43,6 +41,12 @@ public class BossBarMain implements Runnable {
         TextComponent title = (TextComponent) Component.text(this.time.getTime()).font(FONT);
 
         bar = bar.name(title);
+    }
+
+    public void remove(){
+        for (Player player: Bukkit.getOnlinePlayers()){
+            player.hideBossBar(bar);
+        }
     }
 
     @Override

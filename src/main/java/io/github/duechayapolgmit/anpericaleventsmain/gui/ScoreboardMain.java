@@ -1,4 +1,4 @@
-package io.github.duechayapolgmit.anpericaleventsmain.scoreboard;
+package io.github.duechayapolgmit.anpericaleventsmain.gui;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -8,8 +8,6 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.*;
-
-import java.awt.*;
 
 public class ScoreboardMain implements Runnable  {
 

@@ -1,15 +1,25 @@
 package io.github.duechayapolgmit.anpericaleventsmain;
 
-import io.github.duechayapolgmit.anpericaleventsmain.bossbar.BossBarMain;
-import io.github.duechayapolgmit.anpericaleventsmain.scoreboard.ScoreboardMain;
+import io.github.duechayapolgmit.anpericaleventsmain.chat.ChatManager;
+import io.github.duechayapolgmit.anpericaleventsmain.chat.GameStateChangeChat;
+import io.github.duechayapolgmit.anpericaleventsmain.gui.BossBarMain;
+import io.github.duechayapolgmit.anpericaleventsmain.gui.ScoreboardMain;
 
+import io.github.duechayapolgmit.anpericaleventsmain.state.GameState;
+import io.github.duechayapolgmit.anpericaleventsmain.type.ChatType;
 import io.github.duechayapolgmit.anpericaleventsmain.utils.Time;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.boss.BossBar;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class Runner extends JavaPlugin {
 
@@ -19,13 +29,21 @@ public final class Runner extends JavaPlugin {
 
     private BukkitTask timerTask;
 
+    private List<BossBarMain> activeBossBars = new ArrayList<BossBarMain>();
+
     Time time;
 
     @Override
     public void onEnable() {
-        time = new Time(60);
+        time = new Time(120);
+
         BossBarMain statusBar = new BossBarMain("\uE001");
+        activeBossBars.add(statusBar);
         BossBarMain timeBossBar = new BossBarMain(time);
+        activeBossBars.add(timeBossBar);
+
+        ChatManager.getInstance().sendMessage(ChatType.DEBUG, Component.text("Plugin initialised"));
+        ChatManager.getInstance().sendMessage(ChatType.DEBUG, GameStateChangeChat.getMessage(GameState.PRE_GAME,GameState.IN_GAME));
 
         scoreboardTask = getServer().getScheduler().runTaskTimer(this, ScoreboardMain.getInstance(), 0, 20);
         bgBossBarTask = getServer().getScheduler().runTaskTimer(this, statusBar, 0, 4);
@@ -36,7 +54,6 @@ public final class Runner extends JavaPlugin {
             public void run() {
                 time.decrement();
                 timeBossBar.update();
-                System.out.println(time.getTime());
 
                 if (time.getRawTime() == 0) timerTask.cancel();
             }
@@ -48,6 +65,16 @@ public final class Runner extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+
+        // Disable boss bars
+        for (BossBarMain bar: activeBossBars){
+            bar.remove();
+            System.out.println(bar);
+        }
+        activeBossBars = new ArrayList<BossBarMain>();
+
+        bgBossBarTask.cancel();
+        bossbarTask.cancel();
     }
 
     @EventHandler
