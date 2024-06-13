@@ -1,17 +1,24 @@
 package io.github.duechayapolgmit.anpericaleventsmain;
 
+import io.github.duechayapolgmit.anpericaleventsmain.bossbar.BossBarManager;
 import io.github.duechayapolgmit.anpericaleventsmain.bossbar.TimeBossBar;
 import io.github.duechayapolgmit.anpericaleventsmain.chat.ChatManager;
 import io.github.duechayapolgmit.anpericaleventsmain.chat.GameStateChangeChat;
 import io.github.duechayapolgmit.anpericaleventsmain.bossbar.BossBar;
+import io.github.duechayapolgmit.anpericaleventsmain.command.StartCommand;
 import io.github.duechayapolgmit.anpericaleventsmain.gui.ScoreboardMain;
 
 import io.github.duechayapolgmit.anpericaleventsmain.state.GameState;
 import io.github.duechayapolgmit.anpericaleventsmain.state.StateManager;
+import io.github.duechayapolgmit.anpericaleventsmain.task.TaskManager;
 import io.github.duechayapolgmit.anpericaleventsmain.task.TimerTask;
 import io.github.duechayapolgmit.anpericaleventsmain.type.ChatType;
 import io.github.duechayapolgmit.anpericaleventsmain.utils.Debug;
 import io.github.duechayapolgmit.anpericaleventsmain.utils.Time;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.plugin.bootstrap.BootstrapContext;
+import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
@@ -33,31 +40,19 @@ public final class Runner extends JavaPlugin {
     private BukkitTask bgBossBarTask;
     private BukkitTask timerTask;
 
-    private List<BossBar> activeBossBars = new ArrayList<BossBar>();
-
     private GameState currentState = GameState.PRE_GAME;
 
     Time time;
 
     @Override
     public void onEnable() {
-        time = new Time(11);
 
         BossBar statusBar = new BossBar("\uE001");
-        activeBossBars.add(statusBar);
-        TimeBossBar timeBossBar = new TimeBossBar(StateManager.getInstance().getGameState(), time);
-        activeBossBars.add(timeBossBar);
+        BossBarManager.addBossBar(statusBar);
         Debug.log(Component.text("Plugin initialised").color(TextColor.color(0xFFFFFF)));
 
         scoreboardTask = scheduler.runTaskTimer(this, ScoreboardMain.getInstance(), 0, 20);
         bgBossBarTask = scheduler.runTaskTimer(this, statusBar, 0, 4);
-        bossbarTask = scheduler.runTaskTimer(this, timeBossBar, 23, 18);
-
-        TimerTask.getInstance().startTask(scheduler, timeBossBar);
-    }
-
-    public void setCurrentState(GameState state) {
-        this.currentState = state;
     }
 
     @Override
@@ -65,14 +60,15 @@ public final class Runner extends JavaPlugin {
         // Plugin shutdown logic
 
         // Disable boss bars
-        for (BossBar bar: activeBossBars){
+        for (BossBar bar: BossBarManager.getBossBars()){
             bar.remove();
             System.out.println(bar);
         }
-        activeBossBars = new ArrayList<BossBar>();
+        // Remove all active boss bars
+        BossBarManager.getBossBars().clear();
 
         bgBossBarTask.cancel();
-        bossbarTask.cancel();
+        TaskManager.getTask("boss-bar").cancel();
     }
 
     @EventHandler

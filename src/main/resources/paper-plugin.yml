@@ -1,4 +1,5 @@
 name: anperical-events-main
 version: '${version}'
 main: io.github.duechayapolgmit.anpericaleventsmain.Runner
+bootstrapper: io.github.duechayapolgmit.anpericaleventsmain.Bootstrap
 api-version: '1.20'
