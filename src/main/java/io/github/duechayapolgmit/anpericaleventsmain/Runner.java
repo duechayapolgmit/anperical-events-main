@@ -7,6 +7,8 @@ import io.github.duechayapolgmit.anpericaleventsmain.bossbar.BossBar;
 import io.github.duechayapolgmit.anpericaleventsmain.gui.ScoreboardMain;
 
 import io.github.duechayapolgmit.anpericaleventsmain.state.GameState;
+import io.github.duechayapolgmit.anpericaleventsmain.state.StateManager;
+import io.github.duechayapolgmit.anpericaleventsmain.task.TimerTask;
 import io.github.duechayapolgmit.anpericaleventsmain.type.ChatType;
 import io.github.duechayapolgmit.anpericaleventsmain.utils.Time;
 import net.kyori.adventure.text.Component;
@@ -42,7 +44,7 @@ public final class Runner extends JavaPlugin {
 
         BossBar statusBar = new BossBar("\uE001");
         activeBossBars.add(statusBar);
-        TimeBossBar timeBossBar = new TimeBossBar(currentState, time);
+        TimeBossBar timeBossBar = new TimeBossBar(StateManager.getInstance().getGameState(), time);
         activeBossBars.add(timeBossBar);
 
         ChatManager.getInstance().sendMessage(ChatType.DEBUG, Component.text("Plugin initialised").color(TextColor.color(0xFFFFFF)));
@@ -51,32 +53,11 @@ public final class Runner extends JavaPlugin {
         bgBossBarTask = scheduler.runTaskTimer(this, statusBar, 0, 4);
         bossbarTask = scheduler.runTaskTimer(this, timeBossBar, 23, 18);
 
-        // to be refactored
-        timerTask = scheduler.runTaskTimer(this, new Runnable() {
-            @Override
-            public void run() {
-                if (timeBossBar.getTime() == null) {
-                    timeBossBar.update();
-                    timerTask.cancel();
-                }
-                timeBossBar.getTime().decrement();
-                if (timeBossBar.getTime().getRawTime() == 0) {
-                    if (currentState == GameState.PRE_GAME) {
-                        ChatManager.getInstance().sendMessage(ChatType.DEBUG, GameStateChangeChat.getMessage(GameState.PRE_GAME,GameState.IN_GAME));
-                        timeBossBar.setTime(new Time(10));
-                        timeBossBar.changeState(GameState.IN_GAME);
-                        currentState = GameState.IN_GAME;
-                    }
-                    else if (currentState == GameState.IN_GAME) {
-                        ChatManager.getInstance().sendMessage(ChatType.DEBUG, GameStateChangeChat.getMessage(GameState.IN_GAME,GameState.POST_GAME));
-                        currentState = GameState.POST_GAME;
-                        timeBossBar.setTime(null);
-                        timeBossBar.changeState(GameState.POST_GAME);
-                    }
-                }
-                timeBossBar.update();
-            }
-        }, 20, 20);
+        TimerTask.getInstance().startTask(scheduler, timeBossBar);
+    }
+
+    public void setCurrentState(GameState state) {
+        this.currentState = state;
     }
 
     @Override
