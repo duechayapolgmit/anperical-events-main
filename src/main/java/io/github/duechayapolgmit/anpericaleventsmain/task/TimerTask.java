@@ -8,6 +8,7 @@ import io.github.duechayapolgmit.anpericaleventsmain.chat.GameStateChangeChat;
 import io.github.duechayapolgmit.anpericaleventsmain.state.GameState;
 import io.github.duechayapolgmit.anpericaleventsmain.state.StateManager;
 import io.github.duechayapolgmit.anpericaleventsmain.type.ChatType;
+import io.github.duechayapolgmit.anpericaleventsmain.utils.Debug;
 import io.github.duechayapolgmit.anpericaleventsmain.utils.Time;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
@@ -31,13 +32,13 @@ public class TimerTask {
 
                 if (bar.getTime().getRawTime() == 0) {
                     if (state == GameState.PRE_GAME) {
-                        ChatManager.getInstance().sendMessage(ChatType.DEBUG, GameStateChangeChat.getMessage(GameState.PRE_GAME,GameState.IN_GAME));
+                        Debug.log(GameStateChangeChat.getMessage(GameState.PRE_GAME,GameState.IN_GAME));
                         bar.setTime(new Time(10));
                         bar.changeState(GameState.IN_GAME);
                         sm.setGameState(GameState.IN_GAME);
                     }
                     else if (state == GameState.IN_GAME) {
-                        ChatManager.getInstance().sendMessage(ChatType.DEBUG, GameStateChangeChat.getMessage(GameState.IN_GAME,GameState.POST_GAME));
+                        Debug.log(GameStateChangeChat.getMessage(GameState.IN_GAME,GameState.POST_GAME));
                         sm.setGameState(GameState.POST_GAME);
                         bar.setTime(null);
                         bar.changeState(GameState.POST_GAME);

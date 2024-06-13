@@ -10,6 +10,7 @@ import io.github.duechayapolgmit.anpericaleventsmain.state.GameState;
 import io.github.duechayapolgmit.anpericaleventsmain.state.StateManager;
 import io.github.duechayapolgmit.anpericaleventsmain.task.TimerTask;
 import io.github.duechayapolgmit.anpericaleventsmain.type.ChatType;
+import io.github.duechayapolgmit.anpericaleventsmain.utils.Debug;
 import io.github.duechayapolgmit.anpericaleventsmain.utils.Time;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -46,8 +47,7 @@ public final class Runner extends JavaPlugin {
         activeBossBars.add(statusBar);
         TimeBossBar timeBossBar = new TimeBossBar(StateManager.getInstance().getGameState(), time);
         activeBossBars.add(timeBossBar);
-
-        ChatManager.getInstance().sendMessage(ChatType.DEBUG, Component.text("Plugin initialised").color(TextColor.color(0xFFFFFF)));
+        Debug.log(Component.text("Plugin initialised").color(TextColor.color(0xFFFFFF)));
 
         scoreboardTask = scheduler.runTaskTimer(this, ScoreboardMain.getInstance(), 0, 20);
         bgBossBarTask = scheduler.runTaskTimer(this, statusBar, 0, 4);

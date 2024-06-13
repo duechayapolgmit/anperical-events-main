@@ -7,12 +7,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class ChatManager {
-
     private final static ChatManager instance = new ChatManager();
 
-    public static ChatManager getInstance() {
-        return instance;
-    }
+    private ChatManager(){}
 
     public void sendMessage(ChatType type, TextComponent message) {
 
@@ -24,5 +21,9 @@ public class ChatManager {
         // (Player player: Bukkit.getOnlinePlayers()){
         //    player.sendMessage(message);
         //}
+    }
+
+    public static ChatManager getInstance() {
+        return instance;
     }
 }
